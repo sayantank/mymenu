@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/router";
-import Navbar from "@/components/Navbar";
 import MainLayout from "@/components/layouts/MainLayout";
 const Dashboard = () => {
   const auth = useAuth();

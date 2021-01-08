@@ -1,6 +1,5 @@
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/router";
-import MainLayout from "./layouts/MainLayout";
 
 const Navbar = () => {
   const auth = useAuth();

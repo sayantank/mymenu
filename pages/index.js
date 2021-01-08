@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import Navbar from "@/components/Navbar";
 import MainLayout from "@/components/layouts/MainLayout";
 
 const Index = () => {
