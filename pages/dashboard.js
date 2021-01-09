@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [selectedDate, setselectedDate] = useState(new Date());
   const [selectedMeal, setSelectedMeal] = useState();
   const [showModal, setShowModal] = useState(false);
+  const [add, setAdd] = useState(true);
 
   const auth = useAuth();
   const { data } = useSWR(
@@ -51,7 +52,8 @@ const Dashboard = () => {
     <>
       {showModal ? (
         <Modal
-          add={true}
+          user={auth.user}
+          add={add}
           selectedMeal={selectedMeal}
           setShowModal={setShowModal}
           selectedDate={selectedDate}
@@ -69,7 +71,10 @@ const Dashboard = () => {
               customInput={<CustomInput />}
             />
             <button
-              onClick={() => setShowModal(!showModal)}
+              onClick={() => {
+                setShowModal(!showModal);
+                setAdd(true);
+              }}
               className="lg:text-lg border-2 border-secondary bg-secondary hover:bg-tertiary font-bold text-white rounded-md px-6 py-1"
             >
               Add a Meal
@@ -86,6 +91,7 @@ const Dashboard = () => {
                     setSelectedMeal={setSelectedMeal}
                     setShowModal={setShowModal}
                     editable={true}
+                    setAdd={setAdd}
                   />
                 ))}
               </div>

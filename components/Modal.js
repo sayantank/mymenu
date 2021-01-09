@@ -1,6 +1,9 @@
+import formatDate from "@/utils/formatDate";
 import { useState, useEffect } from "react";
+import { addMeal, updateMeal } from "@/lib/db";
 
 const Modal = ({
+  user,
   add,
   setShowModal,
   selectedDate,
@@ -35,9 +38,24 @@ const Modal = ({
     setValues(temp);
   };
 
-  const handleSubmit = (e) => {
+  const submitMeal = async (e) => {
     setShowModal(false);
-    console.log("submitting");
+    const temp = {};
+    temp.ownerId = user.uid;
+    temp.dishes = values;
+    temp.date = formatDate(selectedDate);
+    temp.title = title;
+    if (add) temp.createdAt = formatDate(new Date());
+    else temp.createdAt = selectedMeal.createdAt;
+    temp.updatedAt = formatDate(new Date());
+
+    if (add) {
+      await addMeal(temp);
+    } else {
+      await updateMeal(temp, selectedMeal.id);
+    }
+
+    window.location.reload();
   };
 
   return (
@@ -64,7 +82,7 @@ const Modal = ({
         <form
           id="meal-form"
           className="w-full flex flex-col items-center space-y-2 lg:space-y-4 bg-white mb-4 py-4"
-          onSubmit={handleSubmit}
+          onSubmit={submitMeal}
         >
           <input
             type="text"
@@ -115,7 +133,11 @@ const Modal = ({
             +
           </button>
         </div>
-        <button type="submit" form="meal-form">
+        <button
+          type="submit"
+          form="meal-form"
+          className="w-full bg-secondary hover:bg-tertiary text-xl lg:text-2xl p-3 text-white font-bold rounded-md mt-6"
+        >
           Submit
         </button>
       </div>

@@ -1,10 +1,19 @@
+import { deleteMeal } from "@/lib/db";
 import { useEffect, useState } from "react";
 
-const MealCard = ({ meal, setSelectedMeal, setShowModal, editable }) => {
+const MealCard = ({
+  meal,
+  setSelectedMeal,
+  setShowModal,
+  editable,
+  setAdd,
+}) => {
   const handleSelect = () => {
     setSelectedMeal(meal);
     setShowModal(true);
+    setAdd(false);
   };
+
   return (
     <div className="flex flex-col space-y-3 p-6 border-2 rounded-md shadow-md">
       <div className="flex items-center border-b-2 space-x-5 py-2">
@@ -24,6 +33,10 @@ const MealCard = ({ meal, setSelectedMeal, setShowModal, editable }) => {
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
             </svg>
             <svg
+              onClick={() => {
+                deleteMeal(meal.id);
+                window.location.reload();
+              }}
               className="w-8 h-8 text-primary cursor-pointer"
               fill="currentColor"
               viewBox="0 0 20 20"
