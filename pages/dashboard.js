@@ -9,6 +9,7 @@ import getDayName from "@/utils/getDayname";
 import MealCard from "@/components/MealCard";
 import formatDate from "@/utils/formatDate";
 import Modal from "@/components/Modal";
+import Skeleton from "react-loading-skeleton";
 import { parseISO } from "date-fns";
 
 const Dashboard = () => {
@@ -102,14 +103,24 @@ const Dashboard = () => {
                 </p>
               </div>
             )
-          ) : null}
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
+              <Skeleton height="360px" />
+              <Skeleton height="360px" />
+              <Skeleton height="360px" />
+            </div>
+          )}
           <button onClick={(e) => auth.signout()}>Sign out</button>
         </MainLayout>
       )}
     </>
   ) : (
     <MainLayout>
-      <h1>Oops! You're not dasdasd in.</h1>
+      <Skeleton className="h-12 lg:h-16 mb-5" width="60%" />
+      <div className="mb-4">
+        <Skeleton className="h-8 lg:h-10" width="120px" />
+        <Skeleton className="h-8 lg:h-10 ml-4" width="120px" />
+      </div>
     </MainLayout>
   );
 };
