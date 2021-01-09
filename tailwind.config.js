@@ -11,6 +11,10 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Inter", ...fontFamily.sans],
+        fancy: ["Kalam", "cursive"],
+      },
+      gridAutoColumns: {
+        card: "minmax(30%, 2fr)",
       },
     },
   },
