@@ -11,6 +11,8 @@ import formatDate from "@/utils/formatDate";
 import Modal from "@/components/Modal";
 import Skeleton from "react-loading-skeleton";
 import { parseISO } from "date-fns";
+import { useRouter } from "next/router";
+import DashboardSkeleton from "@/components/Skeletons/DashboardSkeleton";
 
 const Dashboard = () => {
   const [selectedDate, setselectedDate] = useState(new Date());
@@ -18,13 +20,30 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [add, setAdd] = useState(true);
 
+  const router = useRouter();
+
   const auth = useAuth();
+
   const { data } = useSWR(
     auth.user
       ? [`/api/meals/${formatDate(selectedDate)}`, auth.user.token]
       : null,
     fetcher
   );
+
+  useEffect(() => {
+    if (!(auth.loading || auth.user)) {
+      router.push("/");
+    }
+  }, [auth.user, auth.loading]);
+
+  useEffect(() => {
+    if (!auth.loading) {
+      if (auth.user && auth.user?.username === undefined) {
+        router.push("/register");
+      }
+    }
+  }, [auth.user, auth.loading]);
 
   useEffect(() => {
     if (localStorage.getItem("selectedDate")) {
@@ -49,78 +68,73 @@ const Dashboard = () => {
     );
   };
 
-  return auth.user ? (
-    <>
-      {showModal ? (
-        <Modal
-          user={auth.user}
-          add={add}
-          selectedMeal={selectedMeal}
-          setShowModal={setShowModal}
-          selectedDate={selectedDate}
-          setSelectedMeal={setSelectedMeal}
-        />
-      ) : (
-        <MainLayout>
-          <h1 className="lg:text-6xl text-4xl text-secondary font-extrabold">
-            Dashboard
-          </h1>
-          <div className="flex space-x-5 items-center mt-5">
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => handleDateChange(date)}
-              customInput={<CustomInput />}
-            />
-            <button
-              onClick={() => {
-                setShowModal(!showModal);
-                setAdd(true);
-              }}
-              className="lg:text-lg border-2 border-secondary bg-secondary hover:bg-tertiary font-bold text-white rounded-md px-6 py-1"
-            >
-              Add a Meal
-            </button>
-          </div>
+  if (auth.loading) {
+    return <DashboardSkeleton />;
+  }
 
-          {data !== undefined ? (
-            data.meals.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
-                {data.meals.map((meal, i) => (
-                  <MealCard
-                    key={i}
-                    meal={meal}
-                    setSelectedMeal={setSelectedMeal}
-                    setShowModal={setShowModal}
-                    editable={true}
-                    setAdd={setAdd}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex w-full h-96 py-10 justify-center items-center">
-                <p className="text-3xl font-bold text-secondary text-center">
-                  You haven't added any meals!
-                </p>
-              </div>
-            )
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
-              <Skeleton height="360px" />
-              <Skeleton height="360px" />
-              <Skeleton height="360px" />
-            </div>
-          )}
-          <button onClick={(e) => auth.signout()}>Sign out</button>
-        </MainLayout>
-      )}
-    </>
+  return showModal ? (
+    <Modal
+      user={auth.user}
+      add={add}
+      selectedMeal={selectedMeal}
+      setShowModal={setShowModal}
+      selectedDate={selectedDate}
+      setSelectedMeal={setSelectedMeal}
+    />
   ) : (
     <MainLayout>
-      <Skeleton className="h-12 lg:h-16 mb-5" width="60%" />
-      <div className="mb-4">
-        <Skeleton className="h-8 lg:h-10" width="120px" />
-        <Skeleton className="h-8 lg:h-10 ml-4" width="120px" />
+      <h2 className="lg:text-3xl text-2xl text-secondary font-extrabold mb-3">
+        <span className="text-primary">@</span>
+        {auth.user?.username}
+      </h2>
+      <h1 className="lg:text-6xl text-4xl text-secondary font-extrabold">
+        Dashboard
+      </h1>
+      <div className="flex space-x-5 items-center mt-5">
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => handleDateChange(date)}
+          customInput={<CustomInput />}
+        />
+        <button
+          onClick={() => {
+            setShowModal(!showModal);
+            setAdd(true);
+          }}
+          className="lg:text-lg border-2 border-secondary bg-secondary hover:bg-tertiary font-bold text-white rounded-md px-6 py-1"
+        >
+          Add a Meal
+        </button>
       </div>
+
+      {data !== undefined ? (
+        data.meals.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
+            {data.meals.map((meal, i) => (
+              <MealCard
+                key={i}
+                meal={meal}
+                setSelectedMeal={setSelectedMeal}
+                setShowModal={setShowModal}
+                editable={true}
+                setAdd={setAdd}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex w-full h-96 py-10 justify-center items-center">
+            <p className="text-3xl font-bold text-secondary text-center">
+              You haven't added any meals!
+            </p>
+          </div>
+        )
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-4">
+          <Skeleton height="360px" />
+          <Skeleton height="360px" />
+          <Skeleton height="360px" />
+        </div>
+      )}
     </MainLayout>
   );
 };

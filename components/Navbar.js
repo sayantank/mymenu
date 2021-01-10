@@ -15,9 +15,22 @@ const Navbar = () => {
       <div className="flex-1 flex flex-row justify-end items-center">
         {auth.user ? (
           <div className="flex flex-row space-x-5 items-center">
-            {router.pathname !== "/dashboard" ? (
-              <h2 onClick={() => router.push("/dashboard")}>Dashboard</h2>
-            ) : null}
+            {router.pathname !== "/dashboard" &&
+            router.pathname !== "/register" ? (
+              <h2
+                className="text-base lg:text-base font-semibold text-secondary cursor-pointer"
+                onClick={() => router.push("/dashboard")}
+              >
+                Dashboard
+              </h2>
+            ) : (
+              <h2
+                className="text-base lg:text-base font-semibold text-secondary cursor-pointer"
+                onClick={() => auth.signout()}
+              >
+                Sign Out
+              </h2>
+            )}
             <div
               className="h-8 lgh-10 w-8 lgw-10 overflow-hidden rounded-full cursor-pointer"
               onClick={(e) => router.push("/dashboard")}

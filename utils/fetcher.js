@@ -4,8 +4,8 @@ const fetcher = async (url, token) => {
     headers: new Headers({ "Content-Type": "application/json", token }),
     credentials: "same-origin",
   });
-
-  return res.json();
+  const json = await res.json();
+  return json;
 };
 
 export default fetcher;

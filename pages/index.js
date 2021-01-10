@@ -4,9 +4,6 @@ import MainLayout from "@/components/layouts/MainLayout";
 
 const Index = () => {
   const auth = useAuth();
-  useEffect(() => {
-    console.log(auth.user);
-  }, [auth.user]);
   return (
     <MainLayout>
       <h1>Home</h1>

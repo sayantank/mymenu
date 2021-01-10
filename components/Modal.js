@@ -1,6 +1,10 @@
 import formatDate from "@/utils/formatDate";
 import { useState, useEffect } from "react";
 import { addMeal, updateMeal } from "@/lib/db";
+import isAlnum from "@/utils/isAlnum";
+import isAlpha from "@/utils/isAlpha";
+import { is } from "date-fns/locale";
+import isAlnumSpace from "@/utils/isAlnumSpace";
 
 const Modal = ({
   user,
@@ -13,6 +17,9 @@ const Modal = ({
   const [values, setValues] = useState([]);
   const [curr, setCurr] = useState("");
   const [title, setTitle] = useState("");
+  const [emptyError, setEmptyError] = useState("");
+  const [titleError, setTitleError] = useState("");
+  const [dishError, setDishError] = useState("");
 
   useEffect(() => {
     if (selectedMeal) {
@@ -26,10 +33,22 @@ const Modal = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (values.length > 0) {
+      setEmptyError("");
+    }
+  }, [values]);
+
   const handleAdd = () => {
-    const temp = [...values];
-    temp.push(curr);
-    setValues(temp);
+    if (isAlnumSpace(curr.trim())) {
+      setDishError("");
+      const temp = [...values];
+      temp.push(curr.trim());
+      setValues(temp);
+      setCurr("");
+    } else {
+      setDishError("Invalid Dish");
+    }
   };
 
   const deleteDish = (index) => {
@@ -39,23 +58,39 @@ const Modal = ({
   };
 
   const submitMeal = async (e) => {
-    setShowModal(false);
-    const temp = {};
-    temp.ownerId = user.uid;
-    temp.dishes = values;
-    temp.date = formatDate(selectedDate);
-    temp.title = title;
-    if (add) temp.createdAt = formatDate(new Date());
-    else temp.createdAt = selectedMeal.createdAt;
-    temp.updatedAt = formatDate(new Date());
-
-    if (add) {
-      await addMeal(temp);
+    e.preventDefault();
+    if (values.length > 0 && isAlpha(title)) {
+      setEmptyError("");
+      setTitleError("");
+      setShowModal(false);
+      const temp = {};
+      temp.ownerId = user.uid;
+      temp.ownerUsername = user.username;
+      temp.dishes = values;
+      temp.date = formatDate(selectedDate);
+      temp.title = title;
+      if (add) temp.createdAt = formatDate(new Date());
+      else temp.createdAt = selectedMeal.createdAt;
+      temp.updatedAt = formatDate(new Date());
+      // console.log(temp);
+      if (add) {
+        await addMeal(temp);
+      } else {
+        await updateMeal(temp, selectedMeal.id);
+      }
+      window.location.replace("/dashboard");
     } else {
-      await updateMeal(temp, selectedMeal.id);
+      if (values.length <= 0) {
+        setEmptyError("There are no dishes");
+      } else {
+        setEmptyError("");
+      }
+      if (!isAlpha(title)) {
+        setTitleError("Invalid Title");
+      } else {
+        setTitleError("");
+      }
     }
-
-    window.location.reload();
   };
 
   return (
@@ -72,7 +107,7 @@ const Modal = ({
             <path
               fillRule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
+              clipRule="evenodd"
             ></path>
           </svg>
         </div>
@@ -92,8 +127,16 @@ const Modal = ({
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 text-lg lg:text-xl text-secondary font-semibold py-3 lg:py-4 focus:outline-none border-2 lg:border-4 border-secondary rounded-md"
           />
+          {titleError !== "" && (
+            <h3 className="text-sm lg:text-base text-red-500 font-normal mt-2">
+              {titleError}
+            </h3>
+          )}
           {values.map((value, i) => (
-            <div className="flex w-full items-center px-3 border-b-2 lg:border-b-4">
+            <div
+              key={i}
+              className="flex w-full items-center px-3 border-b-2 lg:border-b-4"
+            >
               <input
                 key={i}
                 className="flex-1 bg-white w-full py-2 lg:py-3 text-md lg:text-lg text-secondary font-medium"
@@ -111,7 +154,7 @@ const Modal = ({
                 <path
                   fillRule="evenodd"
                   d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                 ></path>
               </svg>
             </div>
@@ -126,20 +169,30 @@ const Modal = ({
             onChange={(e) => setCurr(e.target.value)}
           />
           <button
-            className="w-1/4 p-2 lg:p-3 text-2xl lg:text-4xl outline-none bg-primary text-white font-bold focus:outline-none"
+            className="w-1/4 p-2 lg:p-3 text-2xl lg:text-4xl outline-none bg-secondary hover:bg-tertiary text-white font-bold focus:outline-none"
             type="button"
             onClick={handleAdd}
           >
             +
           </button>
         </div>
+        {dishError !== "" && (
+          <h3 className="text-sm lg:text-base text-red-500 font-normal mt-2">
+            {dishError}
+          </h3>
+        )}
         <button
           type="submit"
           form="meal-form"
-          className="w-full bg-secondary hover:bg-tertiary text-xl lg:text-2xl p-3 text-white font-bold rounded-md mt-6"
+          className="w-full bg-primary hover:bg-secondary transition-colors focus:outline-none text-xl lg:text-2xl p-3 text-white font-bold rounded-md mt-6"
         >
           Submit
         </button>
+        {emptyError !== "" && (
+          <h3 className="text-sm lg:text-base text-red-500 font-normal mt-2">
+            {emptyError}
+          </h3>
+        )}
       </div>
     </div>
   );
